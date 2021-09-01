@@ -2,11 +2,16 @@
 
 const grid = document.querySelector(".grid");
 const startButton = document.getElementById("start");
-const score = document.getElementById("score");
+const scoreDisplay = document.getElementById("score");
 let squares = [];
 let currentSnake = [2, 1, 0];
 let direction = 1;
 const width = 10;
+let appleIndex = 0;
+let score = 0;
+let intervalTime = 1000;
+let speed = 0.9;
+let timerID = 0;
 
 function createGrid() {
     for (let i = 0; i < width * width; i++) {
@@ -19,6 +24,19 @@ function createGrid() {
 createGrid();
 
 currentSnake.forEach((index) => squares[index].classList.add("snake"));
+
+function startGame() {
+    
+    currentSnake.forEach((index) => squares[index].classList.remove("snake"));
+    squares[appleIndex].classList.remove("apple")
+    clearInterval(timerID);
+    currentSnake = [2, 1, 0];
+    direction = 1;
+    score = 0;
+    intervalTime = 1000;
+    timerID = setInterval(move, intervalTime);
+    generateApples();
+}
 
 function move() {
     if (
@@ -33,12 +51,30 @@ function move() {
     let tail = currentSnake.pop();
     squares[tail].classList.remove("snake");
     currentSnake.unshift(currentSnake[0] + direction);
+    if (squares[currentSnake[0]].classList.contains("apple")) {
+        squares[currentSnake[0]].classList.remove("apple");
+        squares[tail].classList.add("snake");
+        currentSnake.push(tail);
+        generateApples();
+        score++;
+        scoreDisplay.textContent = score;
+        clearInterval(timerID);
+        console.log(intervalTime);
+        intervalTime = intervalTime * speed;
+        timerId = setInterval(move, intervalTime);
+        console.log(intervalTime);
+    }
     squares[currentSnake[0]].classList.add("snake");
 }
-move();
 
-const timerID = setInterval(move, 1000);
-//clearInterval(timerID);
+function generateApples() {
+    do {
+        appleIndex = Math.floor(Math.random() * 100);
+    } while (squares[appleIndex].classList.contains("snake"));
+    squares[appleIndex].classList.add("apple");
+}
+
+generateApples();
 
 // function control(event) {
 //     if (event.key === 39) {
@@ -66,7 +102,7 @@ window.addEventListener(
                 break;
             case "Up":
             case "ArrowUp":
-                direction = +width;
+                direction = -width;
                 break;
             case "Left":
             case "ArrowLeft":
@@ -85,3 +121,5 @@ window.addEventListener(
     },
     true
 );
+
+startButton.addEventListener("click", startGame);
